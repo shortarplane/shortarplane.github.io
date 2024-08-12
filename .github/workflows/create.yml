@@ -1,0 +1,32 @@
+name: Create Issue from Form
+
+on:
+  workflow_dispatch:
+    inputs:
+      link:
+        description: 'Link to be used as the issue title'
+        required: true
+        default: ''
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const link = github.context.payload.inputs.link;
+            const issueTitle = link;
+            const issueBody = `Issue created for link: ${link}`;
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+            });
+
+            console.log(`Created issue #${issue.number}`);
+            console.log(`::set-output name=issue-number::${issue.number}`);
